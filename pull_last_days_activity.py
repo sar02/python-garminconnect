@@ -19,7 +19,6 @@ from garth.exc import GarthHTTPError
 
 import time
 import shutil
-import pathlib # Bloody Windows backslashes
 
 from garminconnect import (
     Garmin,
@@ -40,14 +39,15 @@ tokenstore = os.getenv("GARMINTOKENS") or "~/.garminconnect"
 api = None
 
 # Define local Zwift Activity location
-user_prof = os.getenv("USERPROFILE")
-z_location = f'{user_prof}/Documents/Zwift/Activities'
+user_prof = (os.getenv("USERPROFILE"))
+z_location = f'{user_prof}\\Documents\\Zwift\\Activities'
+print(z_location)
 
 output_dir="../GarminActivities"
 
 # Example selections and settings
 today = datetime.date.today()
-startdate = today - datetime.timedelta(days=1)  # Select past week
+startdate = today - datetime.timedelta(days=2)  # Select past week
 start = 0
 limit = 1
 start_badge = 1  # Badge related calls calls start counting at 1
@@ -57,10 +57,13 @@ weight = 89.6
 weightunit = 'kg'
 
 def cp_zwift_fits():
-    for file in os.listdir(z_location)
-        if file.endswith(".txt") and datetime.datetime.fromtimestamp(os.path.getctime(file)) > startdate:
+    for file in os.listdir(z_location):
+        #print(file)
+        file_fullpath = os.path.join(z_location, file)
+        file_outpath = os.path.join(output_dir, file)
+        if file.endswith(".fit") and datetime.date.fromtimestamp(os.path.getctime(file_fullpath)) > startdate:
             print(file)
-            shutil.copyfile(os.path.join(z_location, file), output_dir)
+            shutil.copyfile(file_fullpath, file_outpath)
 
 def display_json(api_call, output):
     """Format API output for better readability."""
@@ -142,7 +145,7 @@ def fetch(api):
             for activity in activities:
                 activity_id = activity["activityId"]
                 activity_name = activity["activityName"]
-                display_text(activity)
+                #display_text(activity)
 
                 print(
                     f"api.download_activity({activity_id}, dl_fmt=api.ActivityDownloadFormat.ORIGINAL)"
@@ -150,7 +153,7 @@ def fetch(api):
                 zip_data = api.download_activity(
                     activity_id, dl_fmt=api.ActivityDownloadFormat.ORIGINAL
                 )
-                output_file = f"{output_dir}/{str(activity_name)}.zip"
+                output_file = f"{output_dir}/{str(activity_id)}.zip"
                 with open(output_file, "wb") as fb:
                     fb.write(zip_data)
                 print(f"Activity data downloaded to file {output_file}")
@@ -174,6 +177,8 @@ def fetch(api):
 ## Main program loop
 # Display header and login
 print("\n*** Garmin Connect API Demo by cyberjunky ***\n")
+
+cp_zwift_fits()
 
 # Init API
 if not api:

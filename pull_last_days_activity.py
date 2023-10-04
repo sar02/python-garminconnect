@@ -19,6 +19,7 @@ from garth.exc import GarthHTTPError
 
 import time
 import shutil
+import pathlib # Bloody Windows backslashes
 
 from garminconnect import (
     Garmin,
@@ -38,6 +39,10 @@ password = os.getenv("PASSWORD")
 tokenstore = os.getenv("GARMINTOKENS") or "~/.garminconnect"
 api = None
 
+# Define local Zwift Activity location
+user_prof = os.getenv("USERPROFILE")
+z_location = f'{user_prof}/Documents/Zwift/Activities'
+
 output_dir="../GarminActivities"
 
 # Example selections and settings
@@ -50,6 +55,12 @@ activitytype = ""  # Possible values are: cycling, running, swimming, multi_spor
 activityfile = "MY_ACTIVITY.fit"  # Supported file types are: .fit .gpx .tcx
 weight = 89.6
 weightunit = 'kg'
+
+def cp_zwift_fits():
+    for file in os.listdir(z_location)
+        if file.endswith(".txt") and datetime.datetime.fromtimestamp(os.path.getctime(file)) > startdate:
+            print(file)
+            shutil.copyfile(os.path.join(z_location, file), output_dir)
 
 def display_json(api_call, output):
     """Format API output for better readability."""
